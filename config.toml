@@ -1,0 +1,13 @@
+# Config file for server backend
+# To run in dev mode, use `npm start`
+# To run in production mode, use `npm run live`
+
+# To add a new server, create a new table with [server.servername]
+[server.local]
+dev = true
+login = "serverlogin"
+host = "127.0.0.1"
+port = 5000
+username = "SuperAdmin"
+password = "SuperAdmin"
+# or use `password_env = "ENV_VAR"` to store passwords in the environment

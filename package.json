@@ -5,12 +5,14 @@
   "main": "index.js",
   "scripts": {
     "start": "npx tsc && node built/index.js",
+    "live": "npx tsc && node built/index.js live",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
     "@evotm/gbxclient": "^1.2.1",
+    "@iarna/toml": "^2.2.5",
     "express": "^4.18.1"
   },
   "devDependencies": {
