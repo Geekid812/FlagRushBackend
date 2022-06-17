@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+      "outDir": "./built",
+      "allowJs": true,
+      "target": "es2019",
+      "module": "commonjs"
+    },
+    "include": ["./src/**/*"]
+}
