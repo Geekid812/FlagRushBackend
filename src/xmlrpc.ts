@@ -29,6 +29,18 @@ export class XmlRPCInterface {
         // Filter out the server account
         return res.filter((p) => p.PlayerId !== 0);
     }
+
+    public async joinServer(logins: string[], serverlogin: string, delay: number) {
+        let manialink = `
+        <manialink version="3" name="FlagRushBackend_JoinServer">
+        <script><!--
+        sleep(${delay});
+        OpenLink("#qjoin=${serverlogin}@Trackmania", CMlScript::LinkType::ManialinkBrowser);
+        --></script>
+        </manialink>
+        `;
+        await this.gbx.call("SendDisplayManialinkPageToLogin", logins.join(","), manialink, 0, false);
+    }
 }
 
 export type RPCPlayer = {

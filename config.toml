@@ -2,6 +2,10 @@
 # To run in dev mode, use `npm start`
 # To run in production mode, use `npm run live`
 
+split_threshold = 12 # server will attempt to split if player count greater or equal
+merge_threshold = 5 # server will attempt to merge if player count lower or equal
+reserve_ttl = 60 # expiry time of reservations (in seconds)
+
 # To add a new server, create a new table with [server.servername]
 [server.local]
 dev = true
