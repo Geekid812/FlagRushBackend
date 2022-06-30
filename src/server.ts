@@ -66,12 +66,25 @@ export class GameServer {
 
                     // If another server was found, server split occurs
                     if (other) {
+                        console.log(`server '${this.name}' splits with '${other.name}'`)
                         let leaving_players = this.players.slice(this.players.length / 2 + 1);
                         let logins = leaving_players.map((p) => p.Login);
-                        other.reserve(logins);
+                        other.reserve(logins, ReservationOrigin.ServerSplit);
                         await this.xmlrpc.joinServer(logins, other.login, 15000);
 
                         // TODO XML-RPC event to notify gamemode
+                    }
+                } else if (this.players.length <= this.config.merge_threshold) {
+                    let other = this.servers.askForMerge(this);
+
+                    // If another server was found, server merge occurs
+                    if (other) {
+                        console.log(`server '${this.name}' merges with '${other.name}'`)
+                        let logins = this.players.map((p) => p.Login);
+                        other.reserve(logins, ReservationOrigin.ServerMerge);
+                        await this.xmlrpc.joinServer(logins, other.login, 15000);
+
+                        // TODO XML-RPC event
                     }
                 }
                 break;
@@ -83,10 +96,10 @@ export class GameServer {
         this.spectators.splice(this.spectators.findIndex((p) => p.Login == login), 1);
     }
 
-    public reserve(logins: string[]) {
+    public reserve(logins: string[], origin: ReservationOrigin) {
         let now = Date.now();
         let reserves: Reservation[] = logins.map((login) => {
-            return { login, expire: now + this.config.reserve_ttl * 1000 };
+            return { login, expire: now + this.config.reserve_ttl * 1000, origin };
         });
         this.reservations.push(...reserves);
         this.updateReservations();
@@ -105,7 +118,14 @@ export class GameServer {
 
 type Reservation = {
     login: string,
-    expire: number
+    expire: number,
+    origin: ReservationOrigin
+}
+
+enum ReservationOrigin {
+    ServerSplit,
+    ServerMerge,
+    Matchmaking
 }
 
 export async function loadServers(config: JsonMap): Promise<ServerOperator> {
