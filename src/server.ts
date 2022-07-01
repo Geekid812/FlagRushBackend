@@ -70,11 +70,14 @@ export class GameServer {
                         let leaving_players = this.players.slice(this.players.length / 2 + 1);
                         let logins = leaving_players.map((p) => p.Login);
                         other.reserve(logins, ReservationOrigin.ServerSplit);
-                        await this.xmlrpc.joinServer(logins, other.login, 15000);
+                        this.xmlrpc.joinServer(logins, other.login, 15000);
 
-                        // TODO XML-RPC event to notify gamemode
+                        await this.xmlrpc.sendMatchInfo(
+                            this.players.map((p) => p.Login),
+                            "$fa0This server will split to allow for more players to join!"
+                        );
                     }
-                } else if (this.players.length <= this.config.merge_threshold) {
+                } else if (this.players.length <= this.config.merge_threshold && this.players.length > 0) {
                     let other = this.servers.askForMerge(this);
 
                     // If another server was found, server merge occurs
@@ -82,9 +85,13 @@ export class GameServer {
                         console.log(`server '${this.name}' merges with '${other.name}'`)
                         let logins = this.players.map((p) => p.Login);
                         other.reserve(logins, ReservationOrigin.ServerMerge);
-                        await this.xmlrpc.joinServer(logins, other.login, 15000);
+                        this.xmlrpc.joinServer(logins, other.login, 15000);
+                        this.xmlrpc.joinServerAsSpectator(this.spectators.map((s) => s.Login), other.login, 15000);
 
-                        // TODO XML-RPC event
+                        await this.xmlrpc.sendMatchInfo(
+                            logins,
+                            "$fa0This server will merge with a match in progress, prepare to join in!"
+                        );
                     }
                 }
                 break;

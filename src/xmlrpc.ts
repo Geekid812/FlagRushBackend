@@ -1,4 +1,5 @@
 import { GbxClient } from "@evotm/gbxclient";
+import { DisplayMatchInfo } from "./manialink";
 
 // Use the same version as PyPlanet
 const apiVersion = '2013-04-16';
@@ -30,16 +31,31 @@ export class XmlRPCInterface {
         return res.filter((p) => p.PlayerId !== 0);
     }
 
-    public async joinServer(logins: string[], serverlogin: string, delay: number) {
-        let manialink = `
-        <manialink version="3" name="FlagRushBackend_JoinServer">
-        <script><!--
-        sleep(${delay});
-        OpenLink("#qjoin=${serverlogin}@Trackmania", CMlScript::LinkType::ManialinkBrowser);
-        --></script>
-        </manialink>
-        `;
-        await this.gbx.call("SendDisplayManialinkPageToLogin", logins.join(","), manialink, 0, false);
+    public joinServer(logins: string[], serverlogin: string, delay: number) {
+        setTimeout(async () => {
+            try {
+                await this.gbx.call("SendOpenLinkToLogin", logins.join(","), `#qjoin=${serverlogin}@Trackmania`, 1);
+            } catch (e) {
+                if (e.faultString == "Login unknown.") return;
+                throw e;
+            }
+        }, delay);
+    }
+
+    public joinServerAsSpectator(logins: string[], serverlogin: string, delay: number) {
+        setTimeout(async () => {
+            try {
+                await this.gbx.call("SendOpenLinkToLogin", logins.join(","), `#qspectate=${serverlogin}@Trackmania`, 1);
+            } catch (e) {
+                if (e.faultString == "Login unknown.") return;
+                throw e;
+            }
+        }, delay);
+    }
+
+    public async sendMatchInfo(logins: string[], info: string) {
+        let manialink = DisplayMatchInfo(info);
+        await this.gbx.call("SendDisplayManialinkPageToLogin", logins.join(","), manialink, 30000, false);
     }
 }
 
